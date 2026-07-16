@@ -38,6 +38,7 @@ export default function OwnerRoute() {
           <input
             type="date"
             value={date}
+            max={todayLocalISO()}
             onChange={(e) => setDate(e.target.value)}
             className="border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />

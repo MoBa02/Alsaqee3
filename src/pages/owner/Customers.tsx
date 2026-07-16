@@ -15,9 +15,14 @@ export default function Customers() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showInactive, setShowInactive] = useState(false)
+  const [showOnlyUnassigned, setShowOnlyUnassigned] = useState(false)
+  const [showOnlyMissingPrices, setShowOnlyMissingPrices] = useState(false)
   const [formCustomer, setFormCustomer] = useState<CustomerBalance | null | 'new'>(null)
   const [confirmToggle, setConfirmToggle] = useState<CustomerBalance | null>(null)
   const [showBulkDays, setShowBulkDays] = useState(false)
+
+  const hasMissingPrices = (c: CustomerBalance) =>
+    c.price_per_bottle == null || c.price_1_5l == null || c.price_500ml == null || c.price_250ml == null
 
   const displayName = (c: CustomerBalance) =>
     language === 'ar' ? (c.name_ar || c.name_en) : c.name_en
@@ -35,8 +40,14 @@ export default function Customers() {
 
   useEffect(() => { load() }, [load])
 
+  const activeCustomers = customers.filter((c) => c.active)
+  const unassignedCount = activeCustomers.filter((c) => c.assigned_driver_id == null).length
+  const missingPriceCount = activeCustomers.filter(hasMissingPrices).length
+
   const filtered = customers.filter((c) => {
     if (!showInactive && !c.active) return false
+    if (showOnlyUnassigned && c.assigned_driver_id != null) return false
+    if (showOnlyMissingPrices && !hasMissingPrices(c)) return false
     const q = search.toLowerCase()
     if (!q) return true
     return (
@@ -105,6 +116,38 @@ export default function Customers() {
         {t('customers.showInactive')}
       </label>
 
+      {/* Quick filter chips for data-hygiene issues */}
+      {(unassignedCount > 0 || missingPriceCount > 0) && (
+        <div className="flex flex-wrap gap-2">
+          {unassignedCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowOnlyUnassigned(!showOnlyUnassigned)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors border ${
+                showOnlyUnassigned
+                  ? 'bg-amber-500 text-white border-amber-500'
+                  : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+              }`}
+            >
+              ⚠ {unassignedCount} {t('customers.filterUnassigned')}
+            </button>
+          )}
+          {missingPriceCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowOnlyMissingPrices(!showOnlyMissingPrices)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors border ${
+                showOnlyMissingPrices
+                  ? 'bg-amber-500 text-white border-amber-500'
+                  : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+              }`}
+            >
+              ⚠ {missingPriceCount} {t('customers.filterMissingPrices')}
+            </button>
+          )}
+        </div>
+      )}
+
       <p className="text-sm text-gray-500">{filtered.length} customers</p>
 
       {filtered.length === 0 ? (
@@ -143,6 +186,16 @@ export default function Customers() {
                           {t(`days.${day}`)}
                         </span>
                       ))}
+                      {!c.assigned_driver_id && c.active && (
+                        <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                          ⚠ {t('customers.noDriver')}
+                        </span>
+                      )}
+                      {hasMissingPrices(c) && c.active && (
+                        <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                          ⚠ {t('customers.missingPrices')}
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
                       {driver && <span>👤 {driver.name}</span>}

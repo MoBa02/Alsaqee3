@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import { Delivery, Payment, Profile, Customer, Meeting, formatCurrency, formatDate, toLocalISO, todayLocalISO } from '@/types'
+import { Delivery, Payment, Profile, Customer, Meeting, Expense, formatCurrency, formatDate, toLocalISO, todayLocalISO } from '@/types'
 
 type TopTab = 'driver' | 'sales'
 
@@ -15,8 +15,10 @@ interface RangeStats {
   bottles250ml: number
   emptiesCollected: number
   cashCollected: number
+  expenses: number
+  outstanding: number
   stops: number
-  byDriver: Array<{ name: string; bottles: number; bottles1_5l: number; bottles500ml: number; bottles250ml: number; revenue: number; cash: number }>
+  byDriver: Array<{ name: string; bottles: number; bottles1_5l: number; bottles500ml: number; bottles250ml: number; revenue: number; cash: number; expenses: number }>
   byCustomer: Array<{ name: string; bottles: number; revenue: number }>
   byDay: Array<{ day: string; bottles: number; revenue: number }>
 }
@@ -39,6 +41,24 @@ interface SalesStats {
 function weekAgo() {
   const d = new Date()
   d.setDate(d.getDate() - 6)
+  return toLocalISO(d)
+}
+
+function firstOfThisMonth() {
+  const d = new Date()
+  d.setDate(1)
+  return toLocalISO(d)
+}
+
+function firstOfLastMonth() {
+  const d = new Date()
+  d.setMonth(d.getMonth() - 1, 1)
+  return toLocalISO(d)
+}
+
+function lastOfLastMonth() {
+  const d = new Date()
+  d.setDate(0)
   return toLocalISO(d)
 }
 
@@ -68,20 +88,23 @@ export default function Reports() {
       { data: payments, error: payErr },
       { data: profiles, error: prfErr },
       { data: customers, error: custErr },
+      { data: expenses, error: expErr },
     ] = await Promise.all([
       supabase.from('deliveries').select('*').gte('date', startDate).lte('date', endDate),
       supabase.from('payments').select('*').gte('date', startDate).lte('date', endDate),
       supabase.from('profiles').select('id, name, role').in('role', ['driver', 'manager', 'owner']),
       supabase.from('customers').select('id, name_en').eq('active', true),
+      supabase.from('expenses').select('*').gte('date', startDate).lte('date', endDate),
     ])
 
-    const firstErr = delErr ?? payErr ?? prfErr ?? custErr
+    const firstErr = delErr ?? payErr ?? prfErr ?? custErr ?? expErr
     if (firstErr) {
       console.error('Reports load error:', firstErr)
     }
 
     const dList = (deliveries ?? []) as Delivery[]
     const pList = (payments ?? []) as Payment[]
+    const eList = (expenses ?? []) as Expense[]
     const profList = (profiles ?? []) as Pick<Profile, 'id' | 'name' | 'role'>[]
     const userMap = new Map(profList.map((p) => [p.id, { name: p.name, role: p.role }]))
     const custMap = new Map(((customers ?? []) as Pick<Customer, 'id' | 'name_en'>[]).map((c) => [c.id, c.name_en]))
@@ -94,10 +117,11 @@ export default function Reports() {
     }
 
     // By driver — deliveries
-    const driverMap: Record<string, { name: string; bottles: number; bottles1_5l: number; bottles500ml: number; bottles250ml: number; revenue: number; cash: number }> = {}
+    const driverMap: Record<string, { name: string; bottles: number; bottles1_5l: number; bottles500ml: number; bottles250ml: number; revenue: number; cash: number; expenses: number }> = {}
+    const emptyDriverRow = (name: string) => ({ name, bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0, expenses: 0 })
     for (const d of dList) {
       const key = d.driver_id ?? 'unassigned'
-      if (!driverMap[key]) driverMap[key] = { name: labelFor(d.driver_id, 'Unassigned'), bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0 }
+      if (!driverMap[key]) driverMap[key] = emptyDriverRow(labelFor(d.driver_id, 'Unassigned'))
       driverMap[key].bottles += d.bottles_delivered
       driverMap[key].bottles1_5l += d.bottles_1_5l ?? 0
       driverMap[key].bottles500ml += d.bottles_500ml ?? 0
@@ -107,9 +131,14 @@ export default function Reports() {
     for (const p of pList) {
       if (p.method === 'cash' && p.recorded_by) {
         const key = p.recorded_by
-        if (!driverMap[key]) driverMap[key] = { name: labelFor(p.recorded_by, 'Unknown'), bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0 }
+        if (!driverMap[key]) driverMap[key] = emptyDriverRow(labelFor(p.recorded_by, 'Unknown'))
         driverMap[key].cash += Number(p.amount)
       }
+    }
+    for (const e of eList) {
+      const key = e.driver_id
+      if (!driverMap[key]) driverMap[key] = emptyDriverRow(labelFor(e.driver_id, 'Unknown'))
+      driverMap[key].expenses += Number(e.amount)
     }
 
     // By customer
@@ -137,14 +166,21 @@ export default function Reports() {
         revenue: v.revenue,
       }))
 
+    const revenue = dList.reduce((s, d) => s + Number(d.amount_charged ?? 0), 0)
+    const cashCollected = pList.filter((p) => p.method === 'cash').reduce((s, p) => s + Number(p.amount), 0)
+    const totalPaid = pList.reduce((s, p) => s + Number(p.amount), 0)
+    const totalExpenses = eList.reduce((s, e) => s + Number(e.amount), 0)
+
     setStats({
-      revenue: dList.reduce((s, d) => s + Number(d.amount_charged ?? 0), 0),
+      revenue,
       bottlesDelivered: dList.reduce((s, d) => s + d.bottles_delivered, 0),
       bottles1_5l: dList.reduce((s, d) => s + (d.bottles_1_5l ?? 0), 0),
       bottles500ml: dList.reduce((s, d) => s + (d.bottles_500ml ?? 0), 0),
       bottles250ml: dList.reduce((s, d) => s + (d.bottles_250ml ?? 0), 0),
       emptiesCollected: dList.reduce((s, d) => s + d.empties_returned, 0),
-      cashCollected: pList.filter((p) => p.method === 'cash').reduce((s, p) => s + Number(p.amount), 0),
+      cashCollected,
+      expenses: totalExpenses,
+      outstanding: Math.max(0, revenue - totalPaid),
       stops: dList.length,
       byDriver: Object.values(driverMap).sort((a, b) => b.bottles - a.bottles),
       byCustomer: Object.values(custStatsMap).sort((a, b) => b.bottles - a.bottles),
@@ -205,6 +241,29 @@ export default function Reports() {
 
       {topTab === 'driver' && (
         <>
+          {/* Date range shortcuts */}
+          <div className="flex gap-1.5 flex-wrap">
+            {([
+              { key: 'today',    label: t('reports.rangeToday'),    start: todayLocalISO(),      end: todayLocalISO() },
+              { key: 'week',     label: t('reports.rangeWeek'),     start: weekAgo(),            end: todayLocalISO() },
+              { key: 'thisMon',  label: t('reports.rangeThisMonth'),start: firstOfThisMonth(),   end: todayLocalISO() },
+              { key: 'lastMon',  label: t('reports.rangeLastMonth'),start: firstOfLastMonth(),   end: lastOfLastMonth() },
+            ] as const).map((r) => {
+              const active = startDate === r.start && endDate === r.end
+              return (
+                <button
+                  key={r.key}
+                  onClick={() => { setStartDate(r.start); setEndDate(r.end) }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors border ${
+                    active ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              )
+            })}
+          </div>
+
           {/* Date range pickers */}
           <div className="flex gap-2 items-center">
             <div className="flex-1">
@@ -223,6 +282,7 @@ export default function Reports() {
                 type="date"
                 value={endDate}
                 min={startDate}
+                max={todayLocalISO()}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
@@ -269,6 +329,13 @@ function RangeView({ stats, isSalesRole }: { stats: RangeStats; isSalesRole: boo
           <>
             <StatBox label={t('reports.revenue')} value={formatCurrency(stats.revenue)} icon="📈" />
             <StatBox label={t('reports.cashCollected')} value={formatCurrency(stats.cashCollected)} icon="💵" />
+            {stats.expenses > 0 && (
+              <StatBox label={t('reports.expenses')} value={formatCurrency(stats.expenses)} icon="💸" />
+            )}
+            {stats.outstanding > 0 && (
+              <StatBox label={t('reports.outstanding')} value={formatCurrency(stats.outstanding)} icon="⏳" />
+            )}
+            <StatBox label={t('reports.netProfit')} value={formatCurrency(stats.revenue - stats.expenses)} icon="🏁" />
           </>
         )}
       </div>
@@ -316,6 +383,7 @@ function RangeView({ stats, isSalesRole }: { stats: RangeStats; isSalesRole: boo
                     {d.bottles250ml > 0 && <span>250mL: {d.bottles250ml}</span>}
                     <span>📈 {formatCurrency(d.revenue)}</span>
                     <span>💵 {formatCurrency(d.cash)}</span>
+                    {d.expenses > 0 && <span>💸 {formatCurrency(d.expenses)}</span>}
                   </div>
                 </div>
               ))}

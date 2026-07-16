@@ -436,13 +436,32 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
                           {totalDelivered(stop) === 0 && (
                             <div>
                               <label className="text-sm text-gray-600 font-medium">{t('route.skipReason')}</label>
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {(['skipAbsent', 'skipClosed', 'skipRefused', 'skipOther'] as const).map((key) => {
+                                  const label = t(`route.${key}`)
+                                  const active = stop.skipReason === label
+                                  return (
+                                    <button
+                                      key={key}
+                                      type="button"
+                                      onClick={() => setStops((p) => ({ ...p, [customer.id]: { ...p[customer.id], skipReason: active ? '' : label } }))}
+                                      disabled={stop.saving}
+                                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors border ${
+                                        active ? 'bg-primary-600 text-white border-primary-600' : 'bg-gray-50 text-gray-600 border-gray-200'
+                                      }`}
+                                    >
+                                      {label}
+                                    </button>
+                                  )
+                                })}
+                              </div>
                               <input
                                 type="text"
                                 value={stop.skipReason}
                                 onChange={(e) => setStops((p) => ({ ...p, [customer.id]: { ...p[customer.id], skipReason: e.target.value } }))}
                                 placeholder="e.g. Customer absent, closed…"
                                 disabled={stop.saving}
-                                className="mt-1 w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="mt-2 w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                               />
                             </div>
                           )}
