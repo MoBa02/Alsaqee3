@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLang } from '@/contexts/LanguageContext'
-import { CustomerBalance, Delivery, Payment, formatCurrency, formatDate } from '@/types'
+import { CustomerBalance, Delivery, Payment, formatCurrency, formatDate, todayLocalISO } from '@/types'
 
 type SortMode = 'debt' | 'name'
 
@@ -176,7 +176,7 @@ function PaymentModal({
   const [amount, setAmount] = useState('')
   const [method, setMethod] = useState<'cash' | 'other'>('cash')
   const [note, setNote] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(todayLocalISO())
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 

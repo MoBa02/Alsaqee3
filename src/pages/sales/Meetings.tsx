@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import { Meeting, SALES_AREAS, DELIVERY_DAYS, DeliveryDay, formatDate } from '@/types'
+import { Meeting, SALES_AREAS, DELIVERY_DAYS, DeliveryDay, formatDate, todayLocalISO } from '@/types'
 
 type Filter = 'all' | 'open' | 'closed'
 
@@ -42,7 +42,7 @@ const emptyAdd = (): AddForm => ({
   contactPhone: '',
   area: '',
   notes: '',
-  meetingDate: new Date().toISOString().split('T')[0],
+  meetingDate: todayLocalISO(),
   meetingTime: '',
 })
 
@@ -555,7 +555,7 @@ export default function Meetings() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.city')}</label>
                 <select
                   value={closeForm.area}
-                  onChange={(e) => setCloseForm((f) => ({ ...f, area: e.target.value, deliveryDay: '' }))}
+                  onChange={(e) => setCloseForm((f) => ({ ...f, area: e.target.value }))}
                   className={inputCls}
                 >
                   <option value="">— Select city —</option>

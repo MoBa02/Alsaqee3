@@ -74,6 +74,7 @@ export default {
     expenseAmount: 'Amount (AED)',
     noExpenses: 'No expenses logged today',
     totalExpenses: 'Total Expenses',
+    missingPrice: 'Cannot save — no price set for',
   },
   summary: {
     todaySummary: "Today's Summary",

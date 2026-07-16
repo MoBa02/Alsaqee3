@@ -74,6 +74,7 @@ export default {
     expenseAmount: 'المبلغ (درهم)',
     noExpenses: 'لا مصاريف مسجلة اليوم',
     totalExpenses: 'إجمالي المصاريف',
+    missingPrice: 'لا يمكن الحفظ — لم يتم تحديد السعر لـ',
   },
   summary: {
     todaySummary: 'ملخص اليوم',

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
-import { Profile } from '@/types'
+import { Profile, todayLocalISO } from '@/types'
 import DriverRoute from '@/pages/driver/DriverRoute'
 
 export default function OwnerRoute() {
   const { t } = useTranslation()
   const [drivers, setDrivers] = useState<Profile[]>([])
   const [selectedDriverId, setSelectedDriverId] = useState<string>('all')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(todayLocalISO())
 
   useEffect(() => {
     supabase

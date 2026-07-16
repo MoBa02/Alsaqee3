@@ -275,19 +275,22 @@ function BulkAssignPanel({ driver, onDone }: { driver: Profile; onDone: () => vo
       q = q.is('assigned_driver_id', null)
     }
 
-    const { data: matches } = await q
-    const ids = (matches ?? []).map((r: { id: string }) => r.id)
+    const { data: matches, error: selErr } = await q
+    if (selErr) { setResult(`Error: ${selErr.message}`); setSaving(false); return }
 
+    const ids = (matches ?? []).map((r: { id: string }) => r.id)
     if (ids.length === 0) {
       setResult('No matching customers found.')
       setSaving(false)
       return
     }
 
-    await supabase
+    const { error: updErr } = await supabase
       .from('customers')
       .update({ assigned_driver_id: driver.id })
       .in('id', ids)
+
+    if (updErr) { setResult(`Error: ${updErr.message}`); setSaving(false); return }
 
     setResult(`✓ Assigned ${ids.length} customers to ${driver.name}`)
     setSaving(false)

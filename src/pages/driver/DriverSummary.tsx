@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import { Delivery, Payment, Customer, getTodayDeliveryDay, formatCurrency } from '@/types'
+import { Delivery, Payment, Customer, getDeliveryDayForDate, todayLocalISO, formatCurrency } from '@/types'
 
 interface Summary {
   bottlesDelivered: number
@@ -20,8 +20,7 @@ export default function DriverSummary() {
   const { t } = useTranslation()
   const { profile } = useAuth()
 
-  const todayDay = getTodayDeliveryDay()
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(todayLocalISO())
   const [summary, setSummary] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -34,9 +33,9 @@ export default function DriverSummary() {
     setLoading(true)
 
     const isOwner = profile.role === 'owner'
-    const displayDay = todayDay
+    const displayDay = getDeliveryDayForDate(date)
 
-    // Get all customers for today's route
+    // Get all customers for the selected date's route
     let custQuery = supabase
       .from('customers')
       .select('id')

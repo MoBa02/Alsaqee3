@@ -222,11 +222,13 @@ function BulkDeliveryDaysPanel({ onDone }: { onDone: () => void }) {
     setSaving(true)
     setResult('')
 
-    const { data: matches } = await supabase
+    const { data: matches, error: selErr } = await supabase
       .from('customers')
       .select('id')
       .eq('area', area)
       .eq('active', true)
+
+    if (selErr) { setResult(`Error: ${selErr.message}`); setSaving(false); return }
 
     const ids = (matches ?? []).map((r: { id: string }) => r.id)
     if (ids.length === 0) {
@@ -235,10 +237,12 @@ function BulkDeliveryDaysPanel({ onDone }: { onDone: () => void }) {
       return
     }
 
-    await supabase
+    const { error: updErr } = await supabase
       .from('customers')
       .update({ delivery_days: days })
       .in('id', ids)
+
+    if (updErr) { setResult(`Error: ${updErr.message}`); setSaving(false); return }
 
     setResult(`✓ Updated ${ids.length} customers in ${area} → ${days.join(', ')}`)
     setSaving(false)

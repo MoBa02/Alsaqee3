@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLang } from '@/contexts/LanguageContext'
-import { Customer, CustomerBalance, Delivery, Expense, getTodayDeliveryDay, formatCurrency } from '@/types'
+import { Customer, CustomerBalance, Delivery, Expense, getDeliveryDayForDate, todayLocalISO, formatCurrency } from '@/types'
 import StepperInput from '@/components/StepperInput'
 
 interface StopState {
@@ -53,8 +53,8 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
   const { language } = useLang()
 
   const isAdmin = profile?.role === 'owner' || profile?.role === 'manager'
-  const todayDay = getTodayDeliveryDay()
-  const today = overrideDate ?? new Date().toISOString().split('T')[0]
+  const today = overrideDate ?? todayLocalISO()
+  const todayDay = getDeliveryDayForDate(today)
   const targetDriverId = isAdmin ? overrideDriverId : (overrideDriverId ?? profile?.id)
 
   const [customers, setCustomers] = useState<CustomerBalance[]>([])
@@ -119,19 +119,31 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
     if (!stop) return
 
     setError('')
+
+    const missingPrices: string[] = []
+    if (stop.bottles > 0 && customer.price_per_bottle == null) missingPrices.push(t('route.bigWater'))
+    if (stop.bottles1_5l > 0 && customer.price_1_5l == null) missingPrices.push(t('route.size1_5l'))
+    if (stop.bottles500ml > 0 && customer.price_500ml == null) missingPrices.push(t('route.size500ml'))
+    if (stop.bottles250ml > 0 && customer.price_250ml == null) missingPrices.push(t('route.size250ml'))
+    if (missingPrices.length > 0) {
+      setError(`${t('route.missingPrice')}: ${missingPrices.join(', ')}`)
+      return
+    }
+
     setStops((prev) => ({ ...prev, [customer.id]: { ...prev[customer.id], saving: true } }))
 
     const bigPrice = customer.price_per_bottle ?? 0
     const p1_5l = customer.price_1_5l ?? 0
     const p500ml = customer.price_500ml ?? 0
     const p250ml = customer.price_250ml ?? 0
-    const amountCharged =
+    const rawAmount =
       stop.bottles * bigPrice +
       stop.bottles1_5l * p1_5l +
       stop.bottles500ml * p500ml +
       stop.bottles250ml * p250ml
+    const amountCharged = Math.round(rawAmount * 100) / 100
 
-    const deliveryPayload = {
+    const basePayload = {
       empties_returned: stop.empties,
       bottles_delivered: stop.bottles,
       bottles_1_5l: stop.bottles1_5l,
@@ -139,16 +151,21 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
       bottles_250ml: stop.bottles250ml,
       price_per_bottle_at_time: bigPrice || null,
       amount_charged: amountCharged || null,
-      driver_id: profile?.id,
       note: totalDelivered(stop) === 0 ? (stop.skipReason || null) : null,
     }
 
     let deliveryError: string | null = null
     if (stop.existingDeliveryId) {
-      const { error } = await supabase.from('deliveries').update(deliveryPayload).eq('id', stop.existingDeliveryId)
+      // Preserve original driver_id on updates so admin edits don't overwrite driver attribution
+      const { error } = await supabase.from('deliveries').update(basePayload).eq('id', stop.existingDeliveryId)
       deliveryError = error?.message ?? null
     } else {
-      const { error } = await supabase.from('deliveries').insert({ customer_id: customer.id, date: today, ...deliveryPayload })
+      const { error } = await supabase.from('deliveries').insert({
+        customer_id: customer.id,
+        date: today,
+        driver_id: profile?.id,
+        ...basePayload,
+      })
       deliveryError = error?.message ?? null
     }
 

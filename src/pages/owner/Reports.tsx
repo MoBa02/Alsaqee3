@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import { Delivery, Payment, Profile, Customer, Meeting, formatCurrency } from '@/types'
+import { Delivery, Payment, Profile, Customer, Meeting, formatCurrency, formatDate, toLocalISO, todayLocalISO } from '@/types'
 
 type TopTab = 'driver' | 'sales'
 
@@ -36,11 +36,10 @@ interface SalesStats {
   bySales: SalesPersonStats[]
 }
 
-function today() { return new Date().toISOString().split('T')[0] }
 function weekAgo() {
   const d = new Date()
   d.setDate(d.getDate() - 6)
-  return d.toISOString().split('T')[0]
+  return toLocalISO(d)
 }
 
 export default function Reports() {
@@ -51,7 +50,7 @@ export default function Reports() {
 
   const [topTab, setTopTab] = useState<TopTab>(isSalesRole ? 'sales' : 'driver')
   const [startDate, setStartDate] = useState(weekAgo())
-  const [endDate, setEndDate] = useState(today())
+  const [endDate, setEndDate] = useState(todayLocalISO())
   const [stats, setStats] = useState<RangeStats | null>(null)
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -64,23 +63,41 @@ export default function Reports() {
   async function loadRange() {
     setLoading(true)
 
-    const [{ data: deliveries }, { data: payments }, { data: drivers }, { data: customers }] = await Promise.all([
+    const [
+      { data: deliveries, error: delErr },
+      { data: payments, error: payErr },
+      { data: profiles, error: prfErr },
+      { data: customers, error: custErr },
+    ] = await Promise.all([
       supabase.from('deliveries').select('*').gte('date', startDate).lte('date', endDate),
       supabase.from('payments').select('*').gte('date', startDate).lte('date', endDate),
-      supabase.from('profiles').select('*').eq('role', 'driver'),
+      supabase.from('profiles').select('id, name, role').in('role', ['driver', 'manager', 'owner']),
       supabase.from('customers').select('id, name_en').eq('active', true),
     ])
 
+    const firstErr = delErr ?? payErr ?? prfErr ?? custErr
+    if (firstErr) {
+      console.error('Reports load error:', firstErr)
+    }
+
     const dList = (deliveries ?? []) as Delivery[]
     const pList = (payments ?? []) as Payment[]
-    const drvMap = new Map(((drivers ?? []) as Profile[]).map((d) => [d.id, d.name]))
+    const profList = (profiles ?? []) as Pick<Profile, 'id' | 'name' | 'role'>[]
+    const userMap = new Map(profList.map((p) => [p.id, { name: p.name, role: p.role }]))
     const custMap = new Map(((customers ?? []) as Pick<Customer, 'id' | 'name_en'>[]).map((c) => [c.id, c.name_en]))
 
-    // By driver
+    const labelFor = (userId: string | null | undefined, fallback: string) => {
+      if (!userId) return fallback
+      const u = userMap.get(userId)
+      if (!u) return 'Unknown'
+      return u.role === 'driver' ? u.name : `${u.name} (office)`
+    }
+
+    // By driver — deliveries
     const driverMap: Record<string, { name: string; bottles: number; bottles1_5l: number; bottles500ml: number; bottles250ml: number; revenue: number; cash: number }> = {}
     for (const d of dList) {
       const key = d.driver_id ?? 'unassigned'
-      if (!driverMap[key]) driverMap[key] = { name: drvMap.get(key) ?? 'Unassigned', bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0 }
+      if (!driverMap[key]) driverMap[key] = { name: labelFor(d.driver_id, 'Unassigned'), bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0 }
       driverMap[key].bottles += d.bottles_delivered
       driverMap[key].bottles1_5l += d.bottles_1_5l ?? 0
       driverMap[key].bottles500ml += d.bottles_500ml ?? 0
@@ -90,7 +107,7 @@ export default function Reports() {
     for (const p of pList) {
       if (p.method === 'cash' && p.recorded_by) {
         const key = p.recorded_by
-        if (!driverMap[key]) driverMap[key] = { name: drvMap.get(key) ?? 'Unknown', bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0 }
+        if (!driverMap[key]) driverMap[key] = { name: labelFor(p.recorded_by, 'Unknown'), bottles: 0, bottles1_5l: 0, bottles500ml: 0, bottles250ml: 0, revenue: 0, cash: 0 }
         driverMap[key].cash += Number(p.amount)
       }
     }
@@ -376,7 +393,7 @@ function SalesView({ stats, isAdmin }: { stats: SalesStats; isAdmin: boolean }) 
                           </div>
                           <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500">
                             {m.area && <span>📍 {m.area}</span>}
-                            {m.meeting_date && <span>📅 {m.meeting_date}{m.meeting_time ? ` ${m.meeting_time}` : ''}</span>}
+                            {m.meeting_date && <span>📅 {formatDate(m.meeting_date)}{m.meeting_time ? ` ${m.meeting_time}` : ''}</span>}
                             {m.contact_phone && (
                               <a href={`tel:${m.contact_phone}`} className="text-blue-500">📞 {m.contact_phone}</a>
                             )}

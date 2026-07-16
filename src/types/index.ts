@@ -84,17 +84,6 @@ export const DELIVERY_DAYS: DeliveryDay[] = ['Saturday', 'Sunday', 'Monday', 'Tu
 export const SALES_AREAS = ['Mafraq', 'Abu Dhabi', 'Musaffah', 'Baniyas', 'Shakhboot', 'Shawamikh', 'MBZ', 'Shabiya'] as const
 export type SalesArea = typeof SALES_AREAS[number]
 
-export const AREA_TO_DAYS: Record<string, DeliveryDay[]> = {
-  'Mafraq':    ['Saturday'],
-  'Abu Dhabi': ['Sunday', 'Monday'],
-  'Musaffah':  ['Tuesday'],
-  'Baniyas':   ['Wednesday'],
-  'Shakhboot': ['Wednesday'],
-  'Shawamikh': ['Wednesday'],
-  'MBZ':       ['Thursday'],
-  'Shabiya':   ['Thursday'],
-}
-
 export const JS_DAY_TO_DELIVERY_DAY: Record<number, DeliveryDay | null> = {
   0: 'Sunday',
   1: 'Monday',
@@ -114,15 +103,26 @@ export interface Expense {
   created_at: string
 }
 
-export function getTodayDeliveryDay(): DeliveryDay | null {
-  const day = new Date().getDay()
-  const mapped = JS_DAY_TO_DELIVERY_DAY[day]
+export function toLocalISO(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+export function todayLocalISO(): string {
+  return toLocalISO(new Date())
+}
+
+export function getDeliveryDayForDate(dateStr: string): DeliveryDay | null {
+  const d = new Date(dateStr + 'T12:00:00')
+  const mapped = JS_DAY_TO_DELIVERY_DAY[d.getDay()]
   if (mapped === 'Friday') return null
   return mapped ?? null
 }
 
-export function isDeliveryDay(): boolean {
-  return getTodayDeliveryDay() !== null
+export function getTodayDeliveryDay(): DeliveryDay | null {
+  return getDeliveryDayForDate(todayLocalISO())
 }
 
 export function formatCurrency(amount: number | null | undefined): string {
