@@ -118,6 +118,7 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
     const stop = stops[customer.id]
     if (!stop) return
 
+    setError('')
     setStops((prev) => ({ ...prev, [customer.id]: { ...prev[customer.id], saving: true } }))
 
     const bigPrice = customer.price_per_bottle ?? 0
@@ -142,15 +143,24 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
       note: totalDelivered(stop) === 0 ? (stop.skipReason || null) : null,
     }
 
+    let deliveryError: string | null = null
     if (stop.existingDeliveryId) {
-      await supabase.from('deliveries').update(deliveryPayload).eq('id', stop.existingDeliveryId)
+      const { error } = await supabase.from('deliveries').update(deliveryPayload).eq('id', stop.existingDeliveryId)
+      deliveryError = error?.message ?? null
     } else {
-      await supabase.from('deliveries').insert({ customer_id: customer.id, date: today, ...deliveryPayload })
+      const { error } = await supabase.from('deliveries').insert({ customer_id: customer.id, date: today, ...deliveryPayload })
+      deliveryError = error?.message ?? null
+    }
+
+    if (deliveryError) {
+      setError(`Failed to save stop: ${deliveryError}`)
+      setStops((prev) => ({ ...prev, [customer.id]: { ...prev[customer.id], saving: false } }))
+      return
     }
 
     const payAmount = parseFloat(stop.paymentAmount)
     if (!isNaN(payAmount) && payAmount > 0) {
-      await supabase.from('payments').insert({
+      const { error: paymentError } = await supabase.from('payments').insert({
         customer_id: customer.id,
         amount: payAmount,
         date: today,
@@ -158,6 +168,11 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
         note: stop.paymentMethod === 'other' ? (stop.paymentNote || null) : null,
         recorded_by: profile?.id,
       })
+      if (paymentError) {
+        setError(`Stop saved but payment failed to record: ${paymentError.message}`)
+        setStops((prev) => ({ ...prev, [customer.id]: { ...prev[customer.id], saving: false } }))
+        return
+      }
     }
 
     setStops((prev) => ({
