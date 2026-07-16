@@ -24,6 +24,19 @@ interface CloseDealForm {
   deliveryDays: DeliveryDay[]
 }
 
+interface AddCustomerForm {
+  nameEn: string
+  nameAr: string
+  area: string
+  contact: string
+  price: string
+  deliveryDays: DeliveryDay[]
+}
+
+const emptyAddCustomer = (): AddCustomerForm => ({
+  nameEn: '', nameAr: '', area: '', contact: '', price: '', deliveryDays: [],
+})
+
 const emptyAdd = (): AddForm => ({
   contactName: '',
   contactPhone: '',
@@ -50,6 +63,11 @@ export default function Meetings() {
   const [closeForm, setCloseForm] = useState<CloseDealForm>({ nameEn: '', nameAr: '', area: '', contact: '', price: '', deliveryDays: [] })
   const [closeSaving, setCloseSaving] = useState(false)
   const [closeError, setCloseError] = useState('')
+
+  const [showAddCustomer, setShowAddCustomer] = useState(false)
+  const [addCustForm, setAddCustForm] = useState<AddCustomerForm>(emptyAddCustomer())
+  const [addCustSaving, setAddCustSaving] = useState(false)
+  const [addCustError, setAddCustError] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -94,6 +112,52 @@ export default function Meetings() {
     setShowAddForm(false)
     setAddForm(emptyAdd())
     load()
+  }
+
+  async function handleAddCustomer() {
+    if (!addCustForm.nameEn.trim()) { setAddCustError('Customer name is required'); return }
+    if (addCustForm.deliveryDays.length === 0) { setAddCustError('Select at least one delivery day'); return }
+
+    setAddCustSaving(true)
+    setAddCustError('')
+
+    let assignedDriverId: string | null = null
+    if (addCustForm.area) {
+      const { data: areaCusts } = await supabase
+        .from('customers')
+        .select('assigned_driver_id')
+        .eq('area', addCustForm.area)
+        .eq('active', true)
+        .not('assigned_driver_id', 'is', null)
+        .limit(20)
+
+      if (areaCusts && areaCusts.length > 0) {
+        const counts: Record<string, number> = {}
+        for (const row of areaCusts) {
+          const id = (row as { assigned_driver_id: string }).assigned_driver_id
+          counts[id] = (counts[id] ?? 0) + 1
+        }
+        assignedDriverId = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+      }
+    }
+
+    const { error } = await supabase.from('customers').insert({
+      name_en: addCustForm.nameEn.trim(),
+      name_ar: addCustForm.nameAr.trim() || null,
+      area: addCustForm.area || null,
+      contact: addCustForm.contact.trim() || null,
+      price_per_bottle: addCustForm.price ? parseFloat(addCustForm.price) : null,
+      delivery_days: addCustForm.deliveryDays,
+      assigned_driver_id: assignedDriverId,
+      is_new: true,
+      active: true,
+    })
+
+    setAddCustSaving(false)
+    if (error) { setAddCustError(error.message); return }
+
+    setShowAddCustomer(false)
+    setAddCustForm(emptyAddCustomer())
   }
 
   function openCloseDeal(meeting: Meeting) {
@@ -190,14 +254,22 @@ export default function Meetings() {
   return (
     <div className="px-4 py-4 space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-800">{t('meetings.title')}</h2>
-        <button
-          onClick={() => { setShowAddForm(!showAddForm); setAddError('') }}
-          className="flex items-center gap-1.5 bg-primary-600 text-white text-sm font-medium px-3 py-2 rounded-xl hover:bg-primary-700 transition-colors"
-        >
-          + {t('meetings.addMeeting')}
-        </button>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-bold text-gray-800 shrink-0">{t('meetings.title')}</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setShowAddCustomer(true); setAddCustError('') }}
+            className="flex items-center gap-1 border border-primary-600 text-primary-600 text-sm font-medium px-3 py-2 rounded-xl hover:bg-primary-50 transition-colors"
+          >
+            + {t('customers.addCustomer')}
+          </button>
+          <button
+            onClick={() => { setShowAddForm(!showAddForm); setAddError('') }}
+            className="flex items-center gap-1.5 bg-primary-600 text-white text-sm font-medium px-3 py-2 rounded-xl hover:bg-primary-700 transition-colors"
+          >
+            + {t('meetings.addMeeting')}
+          </button>
+        </div>
       </div>
 
       {/* Add Meeting Form */}
@@ -318,6 +390,128 @@ export default function Meetings() {
           {filtered.map((m) => (
             <MeetingCard key={m.id} meeting={m} onCloseDeal={() => openCloseDeal(m)} />
           ))}
+        </div>
+      )}
+
+      {/* Add Customer Modal */}
+      {showAddCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center sm:items-center p-0 sm:p-4">
+          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">{t('customers.addCustomer')}</h3>
+              <button onClick={() => setShowAddCustomer(false)} className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100">✕</button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {addCustError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{addCustError}</div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.customerNameEn')} *</label>
+                <input
+                  type="text"
+                  value={addCustForm.nameEn}
+                  onChange={(e) => setAddCustForm((f) => ({ ...f, nameEn: e.target.value }))}
+                  className={inputCls}
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.customerNameAr')}</label>
+                <input
+                  type="text"
+                  value={addCustForm.nameAr}
+                  onChange={(e) => setAddCustForm((f) => ({ ...f, nameAr: e.target.value }))}
+                  className={inputCls}
+                  dir="rtl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.city')}</label>
+                <select
+                  value={addCustForm.area}
+                  onChange={(e) => setAddCustForm((f) => ({ ...f, area: e.target.value }))}
+                  className={inputCls}
+                >
+                  <option value="">— Select city —</option>
+                  {SALES_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('meetings.deliveryDay')} *</label>
+                <div className="flex flex-wrap gap-2">
+                  {DELIVERY_DAYS.map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => setAddCustForm((f) => ({
+                        ...f,
+                        deliveryDays: f.deliveryDays.includes(day)
+                          ? f.deliveryDays.filter((d) => d !== day)
+                          : [...f.deliveryDays, day],
+                      }))}
+                      className={`px-3 py-1.5 rounded-xl text-sm font-medium border transition-colors ${
+                        addCustForm.deliveryDays.includes(day)
+                          ? 'bg-primary-600 text-white border-primary-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {day.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.contactPhone')}</label>
+                <input
+                  type="tel"
+                  value={addCustForm.contact}
+                  onChange={(e) => setAddCustForm((f) => ({ ...f, contact: e.target.value }))}
+                  className={inputCls}
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.pricePerBottle')}</label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={addCustForm.price}
+                  onChange={(e) => setAddCustForm((f) => ({ ...f, price: e.target.value }))}
+                  className={inputCls}
+                  placeholder="e.g. 15"
+                  min="0"
+                  step="0.5"
+                />
+              </div>
+
+              <div className="bg-blue-50 rounded-xl p-3 text-sm text-blue-700">
+                🚐 Driver will be auto-assigned based on the city.
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowAddCustomer(false)}
+                  className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleAddCustomer}
+                  disabled={addCustSaving}
+                  className="flex-1 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-60"
+                >
+                  {addCustSaving ? t('meetings.saving') : t('customers.saveCustomer')}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
