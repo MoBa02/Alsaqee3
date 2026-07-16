@@ -1,0 +1,1039 @@
+[
+  {
+    "name_en": "Mafraq camp",
+    "name_ar": "كامب المفرق",
+    "area": "Mafraq",
+    "location_url": "https://maps.app.goo.gl/p8UouKkrSM4VjJrR7?g_st=ic",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Saturday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Golden  Moon Transport",
+    "name_ar": "جولدن مون",
+    "area": "Mafraq",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Saturday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Bannu Gul",
+    "name_ar": "بنو المفرق",
+    "area": "Mafraq",
+    "location_url": "https://maps.app.goo.gl/QPGASJnD1PBP5mbv5?g_st=ic",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Saturday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "bannu 17",
+    "name_ar": "بنو 17",
+    "area": "musaffah",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Saturday",
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "bannu 26",
+    "name_ar": "بنو 26",
+    "area": "musaffah",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Saturday",
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "bannu 37",
+    "name_ar": "بنو 37",
+    "area": "musaffah",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Saturday",
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Royal Bannu",
+    "name_ar": "مطعم ابوظبي",
+    "area": "khalidiya",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Raju Shahi",
+    "name_ar": "راجو شاهي",
+    "area": "Muroor",
+    "location_url": "https://maps.apple/p/R.z4B9E-tBbZaH",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Gaurav Pandey",
+    "name_ar": "غاوراف باندي",
+    "area": "Hamdan Street",
+    "location_url": "https://maps.apple/p/QsXBnonWraJ2Po",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Alsannan Marketing",
+    "name_ar": "السنان ماركتينج",
+    "area": "Electra Street",
+    "location_url": "https://maps.apple/p/ZILsVnaPzREN9c",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Jade properties",
+    "name_ar": "مكتب ساجد",
+    "area": "Electra Street",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "mazroui building",
+    "name_ar": "برج المزروعي",
+    "area": "najda street",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "abubaker",
+    "name_ar": "ابوبكر",
+    "area": "Najda",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "jahid",
+    "name_ar": "جاهد",
+    "area": "Tanker",
+    "location_url": "https://maps.app.goo.gl/XAN5fYx1kdxoL1e46?g_st=ac",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "syrian murror",
+    "name_ar": "سوري المرور",
+    "area": "",
+    "location_url": "https://maps.app.goo.gl/KxpisYHeWGpDWU9b8?g_st=ac",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed alanani",
+    "name_ar": "احمد العناني",
+    "area": "",
+    "location_url": "https://maps.app.goo.gl/Nee1jkTbM8L9Bxjn6?g_st=ac",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Tariq",
+    "name_ar": "طارق",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Safaa",
+    "name_ar": "صفاء",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Yasmeen",
+    "name_ar": "ياسمين",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "abdelrahman shabiya",
+    "name_ar": "عبد الرحمن الشعبيه",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "mhamed Abdullah",
+    "name_ar": "محمد عبدالله",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "abdelrahman ibrahim",
+    "name_ar": "عبد الرحمن ابراهيم",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohamed alzebair",
+    "name_ar": "محمد الزبير",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "arafa almuntazah",
+    "name_ar": "عرفت المنتزه",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "marhaba smoke",
+    "name_ar": "مرحبا للتدخين",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "faihaa",
+    "name_ar": "فيحاء",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "faihaa neighbor",
+    "name_ar": "جنب فيحاء",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "abdelhalim",
+    "name_ar": "عبدالحليم",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Monday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Bannu Office",
+    "name_ar": "مكتب بنو",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Tamm Factory",
+    "name_ar": "مصنع تم",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Hussam",
+    "name_ar": "حسام 26",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed 26",
+    "name_ar": "احمد 26",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohamed Hassan",
+    "name_ar": "محمد حسن",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohamed Ismail",
+    "name_ar": "محمد اسماعيل",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Hadi",
+    "name_ar": "هادي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Abdulraziq",
+    "name_ar": "عبدالرزاق",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohamed Suhaji",
+    "name_ar": "محمد السوهاجي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Samih",
+    "name_ar": "سامح",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Shaheen",
+    "name_ar": "شاهين",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohamed Joel",
+    "name_ar": "محمد جويل",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohamed Ali",
+    "name_ar": "محمد علي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Bilal",
+    "name_ar": "بلال",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ayub",
+    "name_ar": "ايوب",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Adham",
+    "name_ar": "أدهم",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed Rajab",
+    "name_ar": "احمد رجب",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mahmoud Kafrawi",
+    "name_ar": "محمود الكفراوي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ali Albot",
+    "name_ar": "علي البوت",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Abu Saeed",
+    "name_ar": "ابوسعيد",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed Najjar",
+    "name_ar": "احمد النجار",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Tuesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Bannu Mafraq",
+    "name_ar": "بنو المفرق",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mahmoud",
+    "name_ar": "محمود االشوامخ",
+    "area": "Shawamikh",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ibarahim",
+    "name_ar": "ابراهيم",
+    "area": "Shawamikh",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Amir alsudani",
+    "name_ar": "أمير السوداني",
+    "area": "Shawamikh",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed algabari",
+    "name_ar": "احمد الجعبري",
+    "area": "Shawamikh",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohmd hassan sudani",
+    "name_ar": "محمد حسن",
+    "area": "Shawamikh",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Abu bshoy",
+    "name_ar": "ابو بشوي",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ayman",
+    "name_ar": "ايمن شخبوط",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Kenafa",
+    "name_ar": "كنافه",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Kandi",
+    "name_ar": "ماندي",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mahmoud alkaddi",
+    "name_ar": "محمود الفاضي",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed magdi",
+    "name_ar": "احمد مجدي",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Karefour staff",
+    "name_ar": "سكن كارفور",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohmd nadi",
+    "name_ar": "محمد نادي",
+    "area": "Shakhboot",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ikram",
+    "name_ar": "اكرام",
+    "area": "Baniyas",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mai gt one",
+    "name_ar": "ماي جي تي ون",
+    "area": "Baniyas",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Sudani baniyas",
+    "name_ar": "سوداني بني ياس",
+    "area": "Baniyas",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Ahmed kamil",
+    "name_ar": "احمد كامل",
+    "area": "Baniyas",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mustafa abu alnaja",
+    "name_ar": "مصطفى ابو النجا",
+    "area": "Baniyas",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mohmd jamal",
+    "name_ar": "محمد جمال",
+    "area": "Baniyas",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Yasmeen Alsham",
+    "name_ar": "ياسمين الشام",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Filipino banni yas",
+    "name_ar": "فلبيني بني ياس",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Wednesday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Rq talks",
+    "name_ar": "ار كيو توكسس",
+    "area": "Shabiya 12",
+    "location_url": "https://maps.app.goo.gl/GSAH8zqQk7QA6LZa6?g_st=ic",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "White Mart",
+    "name_ar": "وايت مارت",
+    "area": "Shabiya 12",
+    "location_url": "https://maps.apple/p/S.dbMy_jSMo~8n",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Azam",
+    "name_ar": "",
+    "area": "MBZ",
+    "location_url": "https://maps.app.goo.gl/SVP8J9W7jsysCa7u8?g_st=ic",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Havana Ladies tailoring",
+    "name_ar": "",
+    "area": "Shabiya 12",
+    "location_url": "https://maps.apple/p/5eXGb6Dk0gR6BA",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Print by advertising",
+    "name_ar": "",
+    "area": "Shabiya 12",
+    "location_url": "https://maps.apple/p/5eXGb6Dk0gR6BA",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Confident Electronics and Computer",
+    "name_ar": "",
+    "area": "Shabiya 12",
+    "location_url": "https://maps.apple/p/5eXGb6Dk0gR6BA",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Indian Ladies Saloon",
+    "name_ar": "",
+    "area": "Shabiya 12",
+    "location_url": "https://maps.apple/p/5eXGb6Dk0gR6BA",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "mohamed fadel",
+    "name_ar": "محمد فاضل",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "abdelaal",
+    "name_ar": "عبدالعال",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Indian MBZ",
+    "name_ar": "هندي محمد بن زايد",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Shubair",
+    "name_ar": "شوبير",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Um Ahmed",
+    "name_ar": "ام احمد",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Elsisi",
+    "name_ar": "السيسي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Mahmud Somali",
+    "name_ar": "محمود الصومالي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Saloon menhali",
+    "name_ar": "صالون منهالي",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Um Deeri",
+    "name_ar": "ام ديري",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Pakistani n15",
+    "name_ar": "باكستاني n 15",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Hunnah Clothe Store",
+    "name_ar": "هنا محل ملابس",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "OK Travel",
+    "name_ar": "اوكي للسفر",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Khubaib Buiilding",
+    "name_ar": "بناية خباب",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Imran Ahmed",
+    "name_ar": "عمران احمد",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Landmark Phones",
+    "name_ar": "لاندمارك",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  },
+  {
+    "name_en": "Prestige Saloon",
+    "name_ar": "صالون برستيج",
+    "area": "",
+    "location_url": "",
+    "price_per_bottle": null,
+    "delivery_days": [
+      "Thursday"
+    ],
+    "active": true
+  }
+]
