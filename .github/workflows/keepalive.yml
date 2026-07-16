@@ -1,0 +1,26 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Runs every 3 days at 08:00 UTC — well within the 7-day inactivity window
+    - cron: '0 8 */3 * *'
+  workflow_dispatch: # allows manual trigger from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/customers?select=id&limit=1")
+          echo "Response status: $STATUS"
+          # 200 = success (empty array, RLS filtered), anything in 2xx is fine
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
+            echo "Keep-alive ping successful"
+          else
+            echo "Unexpected status $STATUS — check secrets are set correctly"
+            exit 1
+          fi
