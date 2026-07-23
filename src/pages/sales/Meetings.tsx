@@ -21,6 +21,9 @@ interface CloseDealForm {
   area: string
   contact: string
   price: string
+  price1_5l: string
+  price500ml: string
+  price250ml: string
   deliveryDays: DeliveryDay[]
 }
 
@@ -30,11 +33,16 @@ interface AddCustomerForm {
   area: string
   contact: string
   price: string
+  price1_5l: string
+  price500ml: string
+  price250ml: string
   deliveryDays: DeliveryDay[]
 }
 
 const emptyAddCustomer = (): AddCustomerForm => ({
-  nameEn: '', nameAr: '', area: '', contact: '', price: '', deliveryDays: [],
+  nameEn: '', nameAr: '', area: '', contact: '',
+  price: '', price1_5l: '', price500ml: '', price250ml: '',
+  deliveryDays: [],
 })
 
 const emptyAdd = (): AddForm => ({
@@ -60,7 +68,11 @@ export default function Meetings() {
   const [addSaving, setAddSaving] = useState(false)
   const [addError, setAddError] = useState('')
 
-  const [closeForm, setCloseForm] = useState<CloseDealForm>({ nameEn: '', nameAr: '', area: '', contact: '', price: '', deliveryDays: [] })
+  const [closeForm, setCloseForm] = useState<CloseDealForm>({
+    nameEn: '', nameAr: '', area: '', contact: '',
+    price: '', price1_5l: '', price500ml: '', price250ml: '',
+    deliveryDays: [],
+  })
   const [closeSaving, setCloseSaving] = useState(false)
   const [closeError, setCloseError] = useState('')
 
@@ -147,6 +159,9 @@ export default function Meetings() {
       area: addCustForm.area || null,
       contact: addCustForm.contact.trim() || null,
       price_per_bottle: addCustForm.price ? parseFloat(addCustForm.price) : null,
+      price_1_5l: addCustForm.price1_5l ? parseFloat(addCustForm.price1_5l) : null,
+      price_500ml: addCustForm.price500ml ? parseFloat(addCustForm.price500ml) : null,
+      price_250ml: addCustForm.price250ml ? parseFloat(addCustForm.price250ml) : null,
       delivery_days: addCustForm.deliveryDays,
       assigned_driver_id: assignedDriverId,
       is_new: true,
@@ -168,6 +183,9 @@ export default function Meetings() {
       area: meeting.area ?? '',
       contact: meeting.contact_phone ?? '',
       price: '',
+      price1_5l: '',
+      price500ml: '',
+      price250ml: '',
       deliveryDays: [],
     })
     setCloseError('')
@@ -220,6 +238,9 @@ export default function Meetings() {
         area: closeForm.area || null,
         contact: closeForm.contact.trim() || null,
         price_per_bottle: closeForm.price ? parseFloat(closeForm.price) : null,
+        price_1_5l: closeForm.price1_5l ? parseFloat(closeForm.price1_5l) : null,
+        price_500ml: closeForm.price500ml ? parseFloat(closeForm.price500ml) : null,
+        price_250ml: closeForm.price250ml ? parseFloat(closeForm.price250ml) : null,
         delivery_days: deliveryDays,
         assigned_driver_id: assignedDriverId,
         is_new: true,
@@ -478,7 +499,7 @@ export default function Meetings() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.pricePerBottle')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.pricePerBottle')}</label>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -489,6 +510,48 @@ export default function Meetings() {
                   min="0"
                   step="0.5"
                 />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('customers.price1_5l')}</label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={addCustForm.price1_5l}
+                    onChange={(e) => setAddCustForm((f) => ({ ...f, price1_5l: e.target.value }))}
+                    className={inputCls}
+                    placeholder="0"
+                    min="0"
+                    step="0.25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('customers.price500ml')}</label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={addCustForm.price500ml}
+                    onChange={(e) => setAddCustForm((f) => ({ ...f, price500ml: e.target.value }))}
+                    className={inputCls}
+                    placeholder="0"
+                    min="0"
+                    step="0.25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('customers.price250ml')}</label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={addCustForm.price250ml}
+                    onChange={(e) => setAddCustForm((f) => ({ ...f, price250ml: e.target.value }))}
+                    className={inputCls}
+                    placeholder="0"
+                    min="0"
+                    step="0.25"
+                  />
+                </div>
               </div>
 
               <div className="bg-blue-50 rounded-xl p-3 text-sm text-blue-700">
@@ -595,7 +658,7 @@ export default function Meetings() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.pricePerBottle')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.pricePerBottle')}</label>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -606,6 +669,48 @@ export default function Meetings() {
                   min="0"
                   step="0.5"
                 />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('customers.price1_5l')}</label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={closeForm.price1_5l}
+                    onChange={(e) => setCloseForm((f) => ({ ...f, price1_5l: e.target.value }))}
+                    className={inputCls}
+                    placeholder="0"
+                    min="0"
+                    step="0.25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('customers.price500ml')}</label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={closeForm.price500ml}
+                    onChange={(e) => setCloseForm((f) => ({ ...f, price500ml: e.target.value }))}
+                    className={inputCls}
+                    placeholder="0"
+                    min="0"
+                    step="0.25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">{t('customers.price250ml')}</label>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={closeForm.price250ml}
+                    onChange={(e) => setCloseForm((f) => ({ ...f, price250ml: e.target.value }))}
+                    className={inputCls}
+                    placeholder="0"
+                    min="0"
+                    step="0.25"
+                  />
+                </div>
               </div>
 
               <div className="bg-blue-50 rounded-xl p-3 text-sm text-blue-700">
