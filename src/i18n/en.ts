@@ -212,6 +212,11 @@ export default {
     meetingDate: 'Meeting Date',
     meetingTime: 'Meeting Time',
     city: 'City / Area',
+    editMeeting: 'Edit Meeting',
+    reopenSection: 'Reopen this deal',
+    reopenDeal: 'Reopen deal',
+    reopenWarning: 'This will move the meeting back to Open and deactivate the customer created from it. Any past deliveries and payments are preserved. You can reactivate the customer later from the Customers page.',
+    confirmReopen: 'Yes, reopen',
   },
   reports: {
     title: 'Reports',

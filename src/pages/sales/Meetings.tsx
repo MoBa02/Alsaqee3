@@ -15,6 +15,12 @@ interface AddForm {
   meetingTime: string
 }
 
+interface EditForm extends AddForm {
+  id: string
+  status: 'open' | 'closed'
+  customerId: string | null
+}
+
 interface CloseDealForm {
   nameEn: string
   nameAr: string
@@ -80,6 +86,11 @@ export default function Meetings() {
   const [addCustForm, setAddCustForm] = useState<AddCustomerForm>(emptyAddCustomer())
   const [addCustSaving, setAddCustSaving] = useState(false)
   const [addCustError, setAddCustError] = useState('')
+
+  const [editForm, setEditForm] = useState<EditForm | null>(null)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState('')
+  const [confirmingReopen, setConfirmingReopen] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -173,6 +184,80 @@ export default function Meetings() {
 
     setShowAddCustomer(false)
     setAddCustForm(emptyAddCustomer())
+  }
+
+  function openEdit(meeting: Meeting) {
+    setEditForm({
+      id: meeting.id,
+      status: meeting.status,
+      customerId: meeting.customer_id,
+      contactName: meeting.contact_name,
+      contactPhone: meeting.contact_phone ?? '',
+      area: meeting.area ?? '',
+      notes: meeting.notes ?? '',
+      meetingDate: meeting.meeting_date ?? '',
+      meetingTime: meeting.meeting_time ?? '',
+    })
+    setEditError('')
+    setConfirmingReopen(false)
+  }
+
+  async function handleSaveEdit() {
+    if (!editForm) return
+    if (!editForm.contactName.trim()) { setEditError('Contact name is required'); return }
+
+    setEditSaving(true)
+    setEditError('')
+
+    const { error } = await supabase
+      .from('meetings')
+      .update({
+        contact_name: editForm.contactName.trim(),
+        contact_phone: editForm.contactPhone.trim() || null,
+        area: editForm.area || null,
+        notes: editForm.notes.trim() || null,
+        meeting_date: editForm.meetingDate || null,
+        meeting_time: editForm.meetingTime || null,
+      })
+      .eq('id', editForm.id)
+
+    setEditSaving(false)
+    if (error) { setEditError(error.message); return }
+
+    setEditForm(null)
+    load()
+  }
+
+  async function handleReopen() {
+    if (!editForm) return
+    setEditSaving(true)
+    setEditError('')
+
+    // If there's a linked customer, deactivate it (safe — preserves deliveries/payments)
+    if (editForm.customerId) {
+      const { error: custErr } = await supabase
+        .from('customers')
+        .update({ active: false })
+        .eq('id', editForm.customerId)
+      if (custErr) { setEditError(`Failed to deactivate customer: ${custErr.message}`); setEditSaving(false); return }
+    }
+
+    const { error: meetErr } = await supabase
+      .from('meetings')
+      .update({
+        status: 'open',
+        customer_id: null,
+        closed_at: null,
+        delivery_day: null,
+      })
+      .eq('id', editForm.id)
+
+    setEditSaving(false)
+    if (meetErr) { setEditError(`Failed to reopen meeting: ${meetErr.message}`); return }
+
+    setEditForm(null)
+    setConfirmingReopen(false)
+    load()
   }
 
   function openCloseDeal(meeting: Meeting) {
@@ -409,7 +494,7 @@ export default function Meetings() {
       ) : (
         <div className="space-y-3">
           {filtered.map((m) => (
-            <MeetingCard key={m.id} meeting={m} onCloseDeal={() => openCloseDeal(m)} />
+            <MeetingCard key={m.id} meeting={m} onCloseDeal={() => openCloseDeal(m)} onEdit={() => openEdit(m)} />
           ))}
         </div>
       )}
@@ -736,11 +821,148 @@ export default function Meetings() {
           </div>
         </div>
       )}
+
+      {/* Edit Meeting Modal */}
+      {editForm && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center sm:items-center p-0 sm:p-4">
+          <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">{t('meetings.editMeeting')}</h3>
+              <button
+                onClick={() => { setEditForm(null); setConfirmingReopen(false) }}
+                className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {editError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{editError}</div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.contactName')} *</label>
+                <input
+                  type="text"
+                  value={editForm.contactName}
+                  onChange={(e) => setEditForm((f) => f && { ...f, contactName: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.contactPhone')}</label>
+                <input
+                  type="tel"
+                  value={editForm.contactPhone}
+                  onChange={(e) => setEditForm((f) => f && { ...f, contactPhone: e.target.value })}
+                  className={inputCls}
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.city')}</label>
+                <select
+                  value={editForm.area}
+                  onChange={(e) => setEditForm((f) => f && { ...f, area: e.target.value })}
+                  className={inputCls}
+                >
+                  <option value="">— Select city —</option>
+                  {SALES_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.meetingDate')}</label>
+                  <input
+                    type="date"
+                    value={editForm.meetingDate}
+                    onChange={(e) => setEditForm((f) => f && { ...f, meetingDate: e.target.value })}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.meetingTime')}</label>
+                  <input
+                    type="time"
+                    value={editForm.meetingTime}
+                    onChange={(e) => setEditForm((f) => f && { ...f, meetingTime: e.target.value })}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('meetings.notes')}</label>
+                <textarea
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm((f) => f && { ...f, notes: e.target.value })}
+                  className={`${inputCls} resize-none`}
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => { setEditForm(null); setConfirmingReopen(false) }}
+                  className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={editSaving}
+                  className="flex-1 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-60"
+                >
+                  {editSaving ? t('meetings.saving') : t('common.save')}
+                </button>
+              </div>
+
+              {/* Reopen (closed meetings only) */}
+              {editForm.status === 'closed' && (
+                <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                  <p className="text-sm font-medium text-gray-700">{t('meetings.reopenSection')}</p>
+                  {!confirmingReopen ? (
+                    <button
+                      onClick={() => setConfirmingReopen(true)}
+                      className="w-full py-2.5 border border-amber-300 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-50"
+                    >
+                      🔓 {t('meetings.reopenDeal')}
+                    </button>
+                  ) : (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
+                      <p className="text-xs text-amber-800">{t('meetings.reopenWarning')}</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setConfirmingReopen(false)}
+                          className="flex-1 py-2 rounded-lg text-xs font-medium bg-white border border-gray-200 text-gray-600"
+                        >
+                          {t('common.cancel')}
+                        </button>
+                        <button
+                          onClick={handleReopen}
+                          disabled={editSaving}
+                          className="flex-1 py-2 rounded-lg text-xs font-medium bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-60"
+                        >
+                          {editSaving ? t('meetings.saving') : t('meetings.confirmReopen')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-function MeetingCard({ meeting, onCloseDeal }: { meeting: Meeting; onCloseDeal: () => void }) {
+function MeetingCard({ meeting, onCloseDeal, onEdit }: { meeting: Meeting; onCloseDeal: () => void; onEdit: () => void }) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const isOpen = meeting.status === 'open'
@@ -794,18 +1016,36 @@ function MeetingCard({ meeting, onCloseDeal }: { meeting: Meeting; onCloseDeal: 
             </a>
           )}
           {isOpen && (
-            <button
-              onClick={onCloseDeal}
-              className="w-full py-3 rounded-xl bg-primary-600 text-white font-medium text-sm hover:bg-primary-700 transition-colors"
-            >
-              ✅ {t('meetings.closeDeal')}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onEdit}
+                className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors"
+              >
+                ✏️ {t('common.edit')}
+              </button>
+              <button
+                onClick={onCloseDeal}
+                className="flex-1 py-3 rounded-xl bg-primary-600 text-white font-medium text-sm hover:bg-primary-700 transition-colors"
+              >
+                ✅ {t('meetings.closeDeal')}
+              </button>
+            </div>
           )}
-          {!isOpen && meeting.closed_at && (
-            <p className="text-xs text-gray-400 text-center">
-              {t('meetings.dealClosed')}: {formatDate(meeting.closed_at)}
-              {meeting.delivery_day && ` · ${meeting.delivery_day}`}
-            </p>
+          {!isOpen && (
+            <>
+              {meeting.closed_at && (
+                <p className="text-xs text-gray-400 text-center">
+                  {t('meetings.dealClosed')}: {formatDate(meeting.closed_at)}
+                  {meeting.delivery_day && ` · ${meeting.delivery_day}`}
+                </p>
+              )}
+              <button
+                onClick={onEdit}
+                className="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors"
+              >
+                ✏️ {t('common.edit')}
+              </button>
+            </>
           )}
         </div>
       )}
