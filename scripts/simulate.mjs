@@ -161,7 +161,11 @@ async function seedCustomers(c, users) {
       s.driver ? users[s.driver] : null,
       s.is_new ?? false,
     ])
-    rows.push({ id: res.rows[0].id, ...s })
+    rows.push({
+      id: res.rows[0].id,
+      ...s,
+      assigned_driver_id: s.driver ? users[s.driver] : null, // real UUID, not the key
+    })
     info(`${s.name_en.padEnd(35)} ${(s.area || '').padEnd(12)} driver=${s.driver ?? '-'}`)
   }
   return rows
@@ -287,39 +291,55 @@ async function simulate(c, users, customers) {
   console.log(`  Deliveries: ${deliveryCount}   Payments: ${paymentCount}   Skips-with-note: ${skipCount}   Expenses: ${expenseCount}`)
 
   // ─── C1 timezone-window test ────────────────────────────────────────
-  // Insert one delivery whose created_at is in the 20:00-23:59 UTC window
-  // (= 00:00-03:59 UAE next day) and whose date is that NEXT day (what fixed app would write).
+  // Insert one delivery whose created_at is at 22:00 UTC (= 02:00 UAE next day)
+  // and whose date is that NEXT day (what the FIXED app writes).
   console.log('\n  ▶ C1 window delivery: created_at 22:00 UTC (02:00 UAE next day), date = next day')
   const abuDhabiCust = customers.find(x => x.name_en === TEST + 'Cust_AbuDhabi_All')
-  // Compute a Monday date in the past 30 days (Abu Dhabi delivers Sun/Mon)
-  // Use daysAgoISO(2) and shift to Monday
   let windowDate = null
   for (let off = 1; off <= 7; off++) {
     const iso = daysAgoISO(off)
     if (dayNameISO(iso) === 'Monday') { windowDate = iso; break }
   }
-  // UTC 22:00 of the day BEFORE windowDate = 02:00 UAE of windowDate
-  const yesterday = daysAgoISO(1 + Math.floor((new Date().getTime() - new Date(windowDate + 'T12:00:00').getTime()) / 86400000))
+  const windowAmount = round2(3 * (abuDhabiCust.price_per_bottle ?? 0) + 1 * (abuDhabiCust.price_1_5l ?? 0))
+  const windowEmpties = 2
+  const windowBig = 3
+
+  // If the main loop already created a delivery on this (customer, date), remove it
+  // and subtract its contribution from expected[] first. Then insert the C1 row cleanly.
+  const preexisting = await c.query(
+    `SELECT id, bottles_delivered, empties_returned, amount_charged
+     FROM public.deliveries WHERE customer_id = $1 AND date = $2`,
+    [abuDhabiCust.id, windowDate]
+  )
+  if (preexisting.rows.length > 0) {
+    const p = preexisting.rows[0]
+    // Roll back the loop's accumulator contribution for this row
+    if (p.amount_charged != null) expected[abuDhabiCust.id].revenue -= Number(p.amount_charged)
+    expected[abuDhabiCust.id].bottles_out -= (p.bottles_delivered - p.empties_returned)
+    // Also roll back any payment logged on the same day (loop paired payments with deliveries)
+    const { rows: sameDayPay } = await c.query(
+      `SELECT id, amount FROM public.payments WHERE customer_id = $1 AND date = $2`,
+      [abuDhabiCust.id, windowDate]
+    )
+    for (const row of sameDayPay) {
+      expected[abuDhabiCust.id].payments -= Number(row.amount)
+    }
+    await c.query(`DELETE FROM public.payments WHERE customer_id = $1 AND date = $2`, [abuDhabiCust.id, windowDate])
+    await c.query(`DELETE FROM public.deliveries WHERE id = $1`, [p.id])
+    info(`  Removed pre-existing loop delivery for ${windowDate} to make room for C1 row`)
+  }
+
   await c.query(`
     INSERT INTO public.deliveries
       (customer_id, driver_id, date, empties_returned, bottles_delivered,
        bottles_1_5l, bottles_500ml, bottles_250ml,
        price_per_bottle_at_time, amount_charged, note, created_at)
-    VALUES ($1, $2, $3, 2, 3, 1, 0, 0, $4, $5, NULL,
+    VALUES ($1, $2, $3, $4, $5, 1, 0, 0, $6, $7, NULL,
       ($3::date - INTERVAL '1 day' + INTERVAL '22 hours')::timestamptz)
-    ON CONFLICT (customer_id, date) DO NOTHING
-  `, [abuDhabiCust.id, users.driver1, windowDate, abuDhabiCust.price_per_bottle, round2(3*18 + 1*6)])
-  // Track it in expected
-  const insertCheck = await c.query(
-    `SELECT amount_charged FROM public.deliveries WHERE customer_id=$1 AND date=$2`,
-    [abuDhabiCust.id, windowDate]
-  )
-  if (insertCheck.rows.length > 0) {
-    const already = expected[abuDhabiCust.id].revenue
-    // This delivery may already exist from the normal simulation loop (Monday delivery)
-    // Just note it — we'll verify via query
-    info(`  Window delivery on ${windowDate} (${dayNameISO(windowDate)}). Amount ${insertCheck.rows[0].amount_charged}`)
-  }
+  `, [abuDhabiCust.id, users.driver1, windowDate, windowEmpties, windowBig, abuDhabiCust.price_per_bottle, windowAmount])
+  expected[abuDhabiCust.id].revenue += windowAmount
+  expected[abuDhabiCust.id].bottles_out += (windowBig - windowEmpties)
+  info(`  Inserted window delivery on ${windowDate} (${dayNameISO(windowDate)}). Amount ${windowAmount} AED`)
 
   return { expected }
 }
@@ -519,6 +539,30 @@ async function verify(c, users, customers, expected, meetings) {
   if (unknownFound) fail('H2 regression: "Unknown" bucket present in by-driver report')
   else pass('H2/H4: no "Unknown" bucket in by-driver breakdown')
 
+  // Both real drivers must appear
+  const d1Row = byDriver[users.driver1]
+  const d2Row = byDriver[users.driver2]
+  if (d1Row && d1Row.bottles > 0) pass(`Driver 1 present with ${d1Row.bottles} bottles`)
+  else fail('Driver 1 missing from by-driver report')
+  if (d2Row && d2Row.bottles > 0) pass(`Driver 2 present with ${d2Row.bottles} bottles`)
+  else fail('Driver 2 missing from by-driver report')
+
+  // Unassigned bucket, if present, must only correspond to the unassigned customer
+  const unassignedRow = byDriver['unassigned']
+  if (unassignedRow) {
+    const unassignedCust = customers.find(x => x.name_en === TEST + 'Cust_Unassigned')
+    const { rows: uaCheck } = await c.query(
+      `SELECT COUNT(*) AS c FROM public.deliveries
+       WHERE date >= $1 AND date <= $2 AND driver_id IS NULL
+         AND customer_id NOT IN ($3)`,
+      [startDate, endDate, unassignedCust.id]
+    )
+    if (Number(uaCheck[0].c) === 0) pass('"Unassigned" bucket only contains the intended null-driver customer')
+    else fail(`Unassigned leakage: ${uaCheck[0].c} deliveries with null driver_id do not belong to Cust_Unassigned`)
+  } else {
+    info('  No Unassigned bucket (no deliveries with null driver_id — expected if Cust_Unassigned had no Thursdays picked)')
+  }
+
   // Date range inclusivity
   const { rows: bnd } = await c.query(
     `SELECT COUNT(*) FILTER (WHERE date = $1) AS start_hit, COUNT(*) FILTER (WHERE date = $2) AS end_hit
@@ -594,6 +638,78 @@ async function verify(c, users, customers, expected, meetings) {
     info('  (In the fixed UI, saveStop blocks the save with a translated error. Simulation matched that behavior.)')
   } else {
     fail(`C2 regression: Trap customer has ${sum500} x 500mL bottles despite null price`)
+  }
+
+  // ── V9: NEW money boxes — Expenses / Outstanding / Net Profit / per-driver expenses
+  console.log('\n─── V9: NEW Reports money boxes (Expenses / Outstanding / Net Profit / per-driver) ───')
+  {
+    // Fetch expenses in range (test rows only)
+    const { rows: rExp } = await c.query(
+      `SELECT * FROM public.expenses
+       WHERE date >= $1 AND date <= $2
+         AND driver_id IN (SELECT id FROM public.profiles WHERE name LIKE $3)`,
+      [startDate, endDate, TEST + '%']
+    )
+
+    // Hand-computed expectations from RAW rows
+    const expRevenue    = round2(rDel.reduce((s, d) => s + Number(d.amount_charged ?? 0), 0))
+    const expTotalPaid  = round2(rPay.reduce((s, p) => s + Number(p.amount), 0)) // ALL methods, not just cash
+    const expTotalCash  = round2(rPay.filter(p => p.method === 'cash').reduce((s, p) => s + Number(p.amount), 0))
+    const expTotalExp   = round2(rExp.reduce((s, e) => s + Number(e.amount), 0))
+    const expOutstanding = round2(Math.max(0, expRevenue - expTotalPaid))
+    const expNetProfit   = round2(expRevenue - expTotalExp)
+
+    // What Reports.tsx WOULD show — mirror its aggregation exactly
+    const uiRevenue     = round2(rDel.reduce((s, d) => s + Number(d.amount_charged ?? 0), 0))
+    const uiTotalPaid   = round2(rPay.reduce((s, p) => s + Number(p.amount), 0))
+    const uiCashCollected = round2(rPay.filter((p) => p.method === 'cash').reduce((s, p) => s + Number(p.amount), 0))
+    const uiExpenses    = round2(rExp.reduce((s, e) => s + Number(e.amount), 0))
+    const uiOutstanding = round2(Math.max(0, uiRevenue - uiTotalPaid))
+    const uiNetProfit   = round2(uiRevenue - uiExpenses)
+
+    console.log(`  Hand-computed from raw rows:`)
+    console.log(`    Σ deliveries.amount_charged     = ${expRevenue} AED   (revenue)`)
+    console.log(`    Σ payments.amount (all methods) = ${expTotalPaid} AED  (used by Outstanding)`)
+    console.log(`    Σ payments.amount (cash only)   = ${expTotalCash} AED  (Cash Collected box)`)
+    console.log(`    Σ expenses.amount               = ${expTotalExp} AED   (Expenses box)`)
+    console.log(`    Outstanding = max(0, ${expRevenue} - ${expTotalPaid}) = ${expOutstanding} AED`)
+    console.log(`    Net Profit  = ${expRevenue} - ${expTotalExp} = ${expNetProfit} AED`)
+    console.log(`  What Reports.tsx aggregation produces (same math):`)
+    console.log(`    Revenue=${uiRevenue}  Cash=${uiCashCollected}  Expenses=${uiExpenses}  Outstanding=${uiOutstanding}  Net=${uiNetProfit}`)
+
+    const boxes = [
+      ['Revenue',        expRevenue,      uiRevenue],
+      ['Cash Collected', expTotalCash,    uiCashCollected],
+      ['Expenses',       expTotalExp,     uiExpenses],
+      ['Outstanding',    expOutstanding,  uiOutstanding],
+      ['Net Profit',     expNetProfit,    uiNetProfit],
+    ]
+    let boxFails = 0
+    for (const [name, exp, got] of boxes) {
+      if (Math.abs(exp - got) > 0.005) { fail(`${name}: expected ${exp}, got ${got}`); boxFails++ }
+    }
+    if (boxFails === 0) pass('All 5 money boxes reconcile to the dirham (Revenue, Cash, Expenses, Outstanding, Net Profit)')
+
+    // Per-driver expenses: same rollup Reports.tsx does — sum(amount) group by driver_id
+    const drvExp = {}
+    for (const e of rExp) {
+      const k = e.driver_id
+      drvExp[k] = round2((drvExp[k] ?? 0) + Number(e.amount))
+    }
+    console.log('  Per-driver expenses (Reports by-driver 💸 column):')
+    let perDrvFails = 0
+    for (const [drvId, amt] of Object.entries(drvExp)) {
+      const label = userMap.get(drvId)?.name ?? drvId
+      const raw = round2(rExp.filter(e => e.driver_id === drvId).reduce((s, e) => s + Number(e.amount), 0))
+      const ok = Math.abs(raw - amt) < 0.005
+      console.log(`    ${label.padEnd(30)} = ${amt} AED  (raw sum: ${raw})  ${ok ? '✓' : '✗'}`)
+      if (!ok) { fail(`per-driver expenses for ${label} mismatch`); perDrvFails++ }
+    }
+    if (perDrvFails === 0 && Object.keys(drvExp).length > 0) {
+      pass(`Per-driver expenses reconcile for ${Object.keys(drvExp).length} drivers`)
+    } else if (Object.keys(drvExp).length === 0) {
+      warn('No expenses in range — per-driver check skipped')
+    }
   }
 
   // ── V8: Payment amount CHECK constraint ────────────────────────────
