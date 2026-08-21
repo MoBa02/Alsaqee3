@@ -209,10 +209,16 @@ export default function Meetings() {
     setEditSaving(true)
     setEditError('')
 
-    const { error } = await supabase.from('meetings').delete().eq('id', editForm.id)
+    // .select('id') returns the deleted rows — if RLS blocks the delete it
+    // "succeeds" with 0 rows, so check and surface that instead of failing silently
+    const { data, error } = await supabase.from('meetings').delete().eq('id', editForm.id).select('id')
 
     setEditSaving(false)
     if (error) { setEditError(`Failed to delete meeting: ${error.message}`); return }
+    if (!data || data.length === 0) {
+      setEditError('Delete was blocked — you can only delete meetings you created.')
+      return
+    }
 
     setEditForm(null)
     setConfirmingDelete(false)

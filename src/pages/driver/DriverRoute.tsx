@@ -124,7 +124,7 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
     language === 'ar' ? (c.name_ar || c.name_en) : c.name_en
 
   const load = useCallback(async () => {
-    if (!todayDay || (!isAdmin && !targetDriverId)) {
+    if (!isAdmin && !targetDriverId) {
       setLoading(false)
       return
     }
@@ -311,15 +311,6 @@ export default function DriverRoute({ overrideDriverId, overrideDate }: Props) {
 
   if (loading) {
     return <div className="flex items-center justify-center h-48 text-gray-400">{t('common.loading')}</div>
-  }
-
-  if (!todayDay) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 text-gray-500 px-8 text-center">
-        <span className="text-5xl">🌙</span>
-        <p className="text-lg font-medium">{t('route.fridayOff')}</p>
-      </div>
-    )
   }
 
   const allExtras = [...extras, ...pendingExtras]

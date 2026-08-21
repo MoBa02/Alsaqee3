@@ -38,7 +38,6 @@ export default {
   route: {
     todaysRoute: 'خط اليوم',
     noDeliveriesToday: 'لا توصيلات اليوم',
-    fridayOff: 'الجمعة — يوم راحة',
     navigate: 'ملاحة',
     emptiesReturned: 'فارغات مُرجعة',
     bottlesDelivered: 'كيلونات تم تسليمها',

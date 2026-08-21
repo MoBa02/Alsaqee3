@@ -79,18 +79,18 @@ export interface Payment {
   created_at: string
 }
 
-export const DELIVERY_DAYS: DeliveryDay[] = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday']
+export const DELIVERY_DAYS: DeliveryDay[] = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
 export const SALES_AREAS = ['Mafraq', 'Abu Dhabi', 'Musaffah', 'Baniyas', 'Shakhboot', 'Shawamikh', 'MBZ', 'Shabiya'] as const
 export type SalesArea = typeof SALES_AREAS[number]
 
-export const JS_DAY_TO_DELIVERY_DAY: Record<number, DeliveryDay | null> = {
+export const JS_DAY_TO_DELIVERY_DAY: Record<number, DeliveryDay> = {
   0: 'Sunday',
   1: 'Monday',
   2: 'Tuesday',
   3: 'Wednesday',
   4: 'Thursday',
-  5: 'Friday',   // off
+  5: 'Friday',
   6: 'Saturday',
 }
 
@@ -114,14 +114,12 @@ export function todayLocalISO(): string {
   return toLocalISO(new Date())
 }
 
-export function getDeliveryDayForDate(dateStr: string): DeliveryDay | null {
+export function getDeliveryDayForDate(dateStr: string): DeliveryDay {
   const d = new Date(dateStr + 'T12:00:00')
-  const mapped = JS_DAY_TO_DELIVERY_DAY[d.getDay()]
-  if (mapped === 'Friday') return null
-  return mapped ?? null
+  return JS_DAY_TO_DELIVERY_DAY[d.getDay()]
 }
 
-export function getTodayDeliveryDay(): DeliveryDay | null {
+export function getTodayDeliveryDay(): DeliveryDay {
   return getDeliveryDayForDate(todayLocalISO())
 }
 

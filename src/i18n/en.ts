@@ -38,7 +38,6 @@ export default {
   route: {
     todaysRoute: "Today's Route",
     noDeliveriesToday: 'No deliveries today',
-    fridayOff: 'Friday — rest day',
     navigate: 'Navigate',
     emptiesReturned: 'Empties returned',
     bottlesDelivered: 'Bottles delivered',
