@@ -91,6 +91,7 @@ export default function Meetings() {
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
   const [confirmingReopen, setConfirmingReopen] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -200,6 +201,22 @@ export default function Meetings() {
     })
     setEditError('')
     setConfirmingReopen(false)
+    setConfirmingDelete(false)
+  }
+
+  async function handleDeleteMeeting() {
+    if (!editForm) return
+    setEditSaving(true)
+    setEditError('')
+
+    const { error } = await supabase.from('meetings').delete().eq('id', editForm.id)
+
+    setEditSaving(false)
+    if (error) { setEditError(`Failed to delete meeting: ${error.message}`); return }
+
+    setEditForm(null)
+    setConfirmingDelete(false)
+    load()
   }
 
   async function handleSaveEdit() {
@@ -829,7 +846,7 @@ export default function Meetings() {
             <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900">{t('meetings.editMeeting')}</h3>
               <button
-                onClick={() => { setEditForm(null); setConfirmingReopen(false) }}
+                onClick={() => { setEditForm(null); setConfirmingReopen(false); setConfirmingDelete(false) }}
                 className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
               >
                 ✕
@@ -907,7 +924,7 @@ export default function Meetings() {
 
               <div className="flex gap-3 pt-1">
                 <button
-                  onClick={() => { setEditForm(null); setConfirmingReopen(false) }}
+                  onClick={() => { setEditForm(null); setConfirmingReopen(false); setConfirmingDelete(false) }}
                   className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50"
                 >
                   {t('common.cancel')}
@@ -954,6 +971,37 @@ export default function Meetings() {
                   )}
                 </div>
               )}
+
+              {/* Delete meeting */}
+              <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                {!confirmingDelete ? (
+                  <button
+                    onClick={() => setConfirmingDelete(true)}
+                    className="w-full py-2.5 border border-red-300 text-red-600 rounded-xl text-sm font-medium hover:bg-red-50"
+                  >
+                    🗑️ {t('meetings.deleteMeeting')}
+                  </button>
+                ) : (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2">
+                    <p className="text-xs text-red-800">{t('meetings.deleteWarning')}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setConfirmingDelete(false)}
+                        className="flex-1 py-2 rounded-lg text-xs font-medium bg-white border border-gray-200 text-gray-600"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                      <button
+                        onClick={handleDeleteMeeting}
+                        disabled={editSaving}
+                        className="flex-1 py-2 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                      >
+                        {editSaving ? t('meetings.saving') : t('meetings.confirmDelete')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

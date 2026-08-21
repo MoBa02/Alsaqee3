@@ -79,6 +79,13 @@ export default {
     noExpenses: 'No expenses logged today',
     totalExpenses: 'Total Expenses',
     missingPrice: 'Cannot save — no price set for',
+    notDelivered: 'Not delivered',
+    notLoggedYet: 'Not logged yet today',
+    extraDelivery: 'Emergency delivery',
+    extraSection: 'Extra deliveries (not scheduled today)',
+    extraPickDay: "Customer's usual delivery day",
+    extraPickCustomer: 'Select customer',
+    extraNoCustomers: 'No customers found for this day',
   },
   summary: {
     todaySummary: "Today's Summary",
@@ -217,6 +224,9 @@ export default {
     reopenDeal: 'Reopen deal',
     reopenWarning: 'This will move the meeting back to Open and deactivate the customer created from it. Any past deliveries and payments are preserved. You can reactivate the customer later from the Customers page.',
     confirmReopen: 'Yes, reopen',
+    deleteMeeting: 'Delete meeting',
+    deleteWarning: 'This will permanently delete this meeting. Any customer created from it is not affected.',
+    confirmDelete: 'Yes, delete',
   },
   reports: {
     title: 'Reports',

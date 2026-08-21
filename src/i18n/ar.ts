@@ -79,6 +79,13 @@ export default {
     noExpenses: 'لا مصاريف مسجلة اليوم',
     totalExpenses: 'إجمالي المصاريف',
     missingPrice: 'لا يمكن الحفظ — لم يتم تحديد السعر لـ',
+    notDelivered: 'لم يتم التسليم',
+    notLoggedYet: 'لم يُسجَّل شيء اليوم',
+    extraDelivery: 'توصيل طارئ',
+    extraSection: 'توصيلات إضافية (خارج جدول اليوم)',
+    extraPickDay: 'يوم التوصيل المعتاد للعميل',
+    extraPickCustomer: 'اختر العميل',
+    extraNoCustomers: 'لا يوجد عملاء لهذا اليوم',
   },
   summary: {
     todaySummary: 'ملخص اليوم',
@@ -252,6 +259,9 @@ export default {
     reopenDeal: 'إعادة فتح',
     reopenWarning: 'سيتم إرجاع الاجتماع إلى "مفتوح" وتعطيل العميل المُنشأ منه. جميع التسليمات والمدفوعات السابقة تبقى محفوظة. يمكنك إعادة تفعيل العميل لاحقاً من صفحة العملاء.',
     confirmReopen: 'نعم، أعد الفتح',
+    deleteMeeting: 'حذف الاجتماع',
+    deleteWarning: 'سيتم حذف هذا الاجتماع نهائياً. العميل المُنشأ منه (إن وجد) لن يتأثر.',
+    confirmDelete: 'نعم، احذف',
   },
   days: {
     Saturday: 'السبت',
